@@ -24,30 +24,48 @@ import (
 //	    return goqu.Record{"name": u.Name, "email": u.Email}
 //	}
 //
-//	saver := data_base.NewSaver(db, gen, toRecord, "users", "id")
+//	saver := data_base.NewSaver[User](db, gen, toRecord, "users", "id")
 //	user := &User{Name: "Alice", Email: "alice@example.com"}
 //	savedUser, err := saver.Save(ctx, user) // user.ID будет установлен после вставки
-type Saver[T Identifier] struct {
+type Saver[T any] struct {
 	tableName     string
 	idColName     string
-	modelToRecord ModelToRecordFunc[T]
+	mapper        Mapper[T]
+	getIdentifier GetIdentifier[T]
+	setIdentifier SetIdentifier[T]
 	db            dbClient.Client
 	gen           *goqu.DialectWrapper
 }
 
-func NewSaver[T Identifier](db dbClient.Client, gen *goqu.DialectWrapper, modelToRecord ModelToRecordFunc[T], tableName string, idColName string) *Saver[T] {
-	return &Saver[T]{tableName: tableName, idColName: idColName, modelToRecord: modelToRecord, db: db, gen: gen}
+func NewSaver[T any](
+	db dbClient.Client,
+	gen *goqu.DialectWrapper,
+	mapper Mapper[T],
+	getIdentifier GetIdentifier[T],
+	setIdentifier SetIdentifier[T],
+	tableName string,
+	idColName string,
+) *Saver[T] {
+	return &Saver[T]{
+		tableName:     tableName,
+		idColName:     idColName,
+		mapper:        mapper,
+		db:            db,
+		gen:           gen,
+		getIdentifier: getIdentifier,
+		setIdentifier: setIdentifier,
+	}
 }
 
 func (s *Saver[T]) Save(ctx context.Context, model *T) (*T, error) {
-	record := s.modelToRecord(model)
+	record := s.mapper(model)
 
 	var queryBuilder exp.SQLExpression
 
-	if (*model).GetId() == 0 {
+	if s.getIdentifier(model) == 0 {
 		queryBuilder = s.gen.Insert(s.tableName).Rows(record).Prepared(true)
 	} else {
-		queryBuilder = s.gen.Update(s.tableName).Set(record).Where(goqu.C(s.idColName).Eq((*model).GetId()))
+		queryBuilder = s.gen.Update(s.tableName).Set(record).Where(goqu.C(s.idColName).Eq(s.getIdentifier(model)))
 	}
 
 	query, args, err := queryBuilder.ToSQL()
@@ -60,13 +78,13 @@ func (s *Saver[T]) Save(ctx context.Context, model *T) (*T, error) {
 		return nil, err
 	}
 
-	if (*model).GetId() == 0 {
+	if s.getIdentifier(model) == 0 {
 		id, err := result.LastInsertId()
 		if err != nil {
 			return nil, err
 		}
 
-		(*model).SetId(uint64(id))
+		s.setIdentifier(model, uint64(id))
 	}
 
 	return model, nil

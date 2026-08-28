@@ -8,7 +8,7 @@ import (
 )
 
 // BulkInserter предназначен для массовой вставки записей (INSERT) одной операцией.
-// Принимает срез указателей на модели и преобразует их в записи с помощью ModelToRecordFunc.
+// Принимает срез указателей на модели и преобразует их в записи с помощью Mapper.
 //
 // Значительно повышает производительность при вставке большого количества записей,
 // сокращая количество сетевых вызовов к базе данных.
@@ -17,7 +17,7 @@ import (
 //
 //	bulk := &data_base.BulkInserter[User]{
 //	    tableName: "users",
-//	    modelToRecord: toRecord,
+//	    mapper: toRecord,
 //	    db: db,
 //	    gen: gen,
 //	}
@@ -25,7 +25,7 @@ import (
 //	err := bulk.BulkInsert(ctx, users...)
 type BulkInserter[T any] struct {
 	tableName     string
-	modelToRecord ModelToRecordFunc[T]
+	modelToRecord Mapper[T]
 	db            dbClient.Client
 	gen           *goqu.DialectWrapper
 }

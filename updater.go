@@ -14,7 +14,7 @@ import (
 // Если идентификатор модели равен 0, метод Update возвращает ошибку IdNotBeZeroError.
 // Это предотвращает случайное выполнение UPDATE без условия WHERE.
 //
-// Компонент использует функцию ModelToRecordFunc для преобразования модели в запись
+// Компонент использует функцию Mapper для преобразования модели в запись
 // (goqu.Record) и выполняет обновление по указанному полю идентификатора.
 //
 // Пример использования:
@@ -32,30 +32,45 @@ import (
 //	)
 //
 //	user := &User{Id: 123, Name: "Updated Name"}
-//	updatedUser, err := updater.Update(ctx, user)
+//	updatedUser, err := updater.Update[User](ctx, user)
 //	if err != nil {
 //	    // Обработка ошибки
 //	}
-type Updater[T Identifier] struct {
+type Updater[T any] struct {
 	tableName     string
 	idColName     string
-	modelToRecord ModelToRecordFunc[T]
+	mapper        Mapper[T]
+	getIdentifier GetIdentifier[T]
 	db            dbClient.Client
 	gen           *goqu.DialectWrapper
 }
 
-func NewUpdater[T Identifier](db dbClient.Client, gen *goqu.DialectWrapper, modelToRecord ModelToRecordFunc[T], tableName string, idColName string) *Updater[T] {
-	return &Updater[T]{tableName: tableName, idColName: idColName, modelToRecord: modelToRecord, db: db, gen: gen}
+func NewUpdater[T any](
+	db dbClient.Client,
+	gen *goqu.DialectWrapper,
+	mapper Mapper[T],
+	getIdentifier GetIdentifier[T],
+	tableName string,
+	idColName string,
+) *Updater[T] {
+	return &Updater[T]{
+		tableName:     tableName,
+		idColName:     idColName,
+		mapper:        mapper,
+		db:            db,
+		gen:           gen,
+		getIdentifier: getIdentifier,
+	}
 }
 
 func (u *Updater[T]) Update(ctx context.Context, model *T) (*T, error) {
-	if (*model).GetId() == 0 {
+	if u.getIdentifier(model) == 0 {
 		return nil, IdNotBeZeroError
 	}
 
 	query, args, err := u.gen.Update(u.tableName).
-		Set(u.modelToRecord(model)).
-		Where(goqu.C(u.idColName).Eq((*model).GetId())).
+		Set(u.mapper(model)).
+		Where(goqu.C(u.idColName).Eq(u.getIdentifier(model))).
 		ToSQL()
 
 	if err != nil {

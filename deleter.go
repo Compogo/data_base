@@ -16,20 +16,20 @@ import (
 //
 // Пример:
 //
-//	deleter := data_base.NewDeleter[*User](db, gen, "users")
+//	deleter := data_base.NewDeleter(db, gen, "users")
 //	filters := []*repository.Filter{repository.NewFilter("id", 123, repository.Eq)}
 //	err := deleter.Delete(ctx, filters...)
-type Deleter[T any] struct {
+type Deleter struct {
 	tableName string
 	db        dbClient.Client
 	gen       *goqu.DialectWrapper
 }
 
-func NewDeleter[T any](db dbClient.Client, gen *goqu.DialectWrapper, tableName string) *Deleter[T] {
-	return &Deleter[T]{tableName: tableName, db: db, gen: gen}
+func NewDeleter(db dbClient.Client, gen *goqu.DialectWrapper, tableName string) *Deleter {
+	return &Deleter{tableName: tableName, db: db, gen: gen}
 }
 
-func (d *Deleter[T]) Delete(ctx context.Context, filters ...*repository.Filter) error {
+func (d *Deleter) Delete(ctx context.Context, filters ...*repository.Filter) error {
 	deleteDataset := d.gen.Delete(d.tableName).Prepared(true)
 
 	var err error

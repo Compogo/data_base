@@ -20,15 +20,15 @@ import (
 //	page := &repository.Page{Number: 0, Limit: 10}
 //	users, err := pager.Page(ctx, page, sorts, filters...)
 type Pager[T any] struct {
-	tableName  string
-	columns    []any
-	rowToModel RowToModelFunc[T]
-	db         dbClient.Client
-	gen        *goqu.DialectWrapper
+	tableName string
+	columns   []any
+	scanner   Scanner[T]
+	db        dbClient.Client
+	gen       *goqu.DialectWrapper
 }
 
-func NewPager[T any](db dbClient.Client, gen *goqu.DialectWrapper, rowToModel RowToModelFunc[T], tableName string, columns ...any) *Pager[T] {
-	return &Pager[T]{tableName: tableName, columns: columns, rowToModel: rowToModel, db: db, gen: gen}
+func NewPager[T any](db dbClient.Client, gen *goqu.DialectWrapper, scanner Scanner[T], tableName string, columns ...any) *Pager[T] {
+	return &Pager[T]{tableName: tableName, columns: columns, scanner: scanner, db: db, gen: gen}
 }
 
 func (p *Pager[T]) Page(ctx context.Context, page *repository.Page, sorts []*repository.Sort, filters ...*repository.Filter) ([]*T, error) {
@@ -62,7 +62,7 @@ func (p *Pager[T]) Page(ctx context.Context, page *repository.Page, sorts []*rep
 
 	var models []*T
 	for rows.Next() {
-		model, err := p.rowToModel(rows)
+		model, err := p.scanner(rows)
 		if err != nil {
 			return nil, err
 		}

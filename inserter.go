@@ -15,22 +15,35 @@ import (
 //
 // Пример:
 //
-//	inserter := data_base.NewInserter(db, gen, toRecord, "users")
+//	inserter := data_base.NewInserter[User](db, gen, toRecord, "users")
 //	user := &User{Name: "Bob", Email: "bob@example.com"}
 //	insertedUser, err := inserter.Insert(ctx, user)
-type Inserter[T Identifier] struct {
+type Inserter[T any] struct {
 	tableName     string
-	modelToRecord ModelToRecordFunc[T]
+	mapper        Mapper[T]
+	setIdentifier SetIdentifier[T]
 	db            dbClient.Client
 	gen           *goqu.DialectWrapper
 }
 
-func NewInserter[T Identifier](db dbClient.Client, gen *goqu.DialectWrapper, modelToRecord ModelToRecordFunc[T], tableName string) *Inserter[T] {
-	return &Inserter[T]{tableName: tableName, modelToRecord: modelToRecord, db: db, gen: gen}
+func NewInserter[T any](
+	db dbClient.Client,
+	gen *goqu.DialectWrapper,
+	mapper Mapper[T],
+	setIdentifier SetIdentifier[T],
+	tableName string,
+) *Inserter[T] {
+	return &Inserter[T]{
+		tableName:     tableName,
+		mapper:        mapper,
+		db:            db,
+		gen:           gen,
+		setIdentifier: setIdentifier,
+	}
 }
 
 func (i *Inserter[T]) Insert(ctx context.Context, model *T) (*T, error) {
-	query, args, err := i.gen.Insert(i.tableName).Rows(i.modelToRecord(model)).Prepared(true).ToSQL()
+	query, args, err := i.gen.Insert(i.tableName).Rows(i.mapper(model)).Prepared(true).ToSQL()
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +58,7 @@ func (i *Inserter[T]) Insert(ctx context.Context, model *T) (*T, error) {
 		return nil, err
 	}
 
-	(*model).SetId(uint64(id))
+	i.setIdentifier(model, uint64(id))
 
 	return model, nil
 }

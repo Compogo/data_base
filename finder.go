@@ -23,19 +23,19 @@ import (
 //	    return &u, err
 //	}
 //
-//	finder := data_base.NewFinder(db, goqu.Dialect("postgres"), rowMapper, "users", "id", "name", "email")
+//	finder := data_base.NewFinder[User](db, goqu.Dialect("postgres"), rowMapper, "users", "id", "name", "email")
 //	filters := []*repository.Filter{repository.NewFilter("name", "Alice", repository.Eq)}
 //	users, err := finder.Find(ctx, nil, filters...)
 type Finder[T any] struct {
-	tableName  string
-	columns    []any
-	rowToModel RowToModelFunc[T]
-	db         dbClient.Client
-	gen        *goqu.DialectWrapper
+	tableName string
+	columns   []any
+	scanner   Scanner[T]
+	db        dbClient.Client
+	gen       *goqu.DialectWrapper
 }
 
-func NewFinder[T any](db dbClient.Client, gen *goqu.DialectWrapper, rowToModel RowToModelFunc[T], tableName string, columns ...any) *Finder[T] {
-	return &Finder[T]{tableName: tableName, columns: columns, db: db, gen: gen, rowToModel: rowToModel}
+func NewFinder[T any](db dbClient.Client, gen *goqu.DialectWrapper, scanner Scanner[T], tableName string, columns ...any) *Finder[T] {
+	return &Finder[T]{tableName: tableName, columns: columns, db: db, gen: gen, scanner: scanner}
 }
 
 func (f *Finder[T]) Find(ctx context.Context, sorts []*repository.Sort, filters ...*repository.Filter) ([]*T, error) {
@@ -69,7 +69,7 @@ func (f *Finder[T]) Find(ctx context.Context, sorts []*repository.Sort, filters 
 
 	var models []*T
 	for rows.Next() {
-		model, err := f.rowToModel(rows)
+		model, err := f.scanner(rows)
 		if err != nil {
 			return nil, err
 		}
