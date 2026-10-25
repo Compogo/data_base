@@ -4,6 +4,8 @@ github.com/Compogo/db-client v1.0.2-rc1 h1:NA5cKsHLv2Qclyyhbwh8VbyHedq4jkWfsqq52
 github.com/Compogo/db-client v1.0.2-rc1/go.mod h1:XgU1Yr4i/1ehLcgpTs8BY8aYznBO+jgSDtxedTMjIM4=
 github.com/Compogo/db-client v1.0.3-rc1 h1:paDYzI+0KACl6HX/bXMnv692VWaYYUHmhJrrJBVfeos=
 github.com/Compogo/db-client v1.0.3-rc1/go.mod h1:XgU1Yr4i/1ehLcgpTs8BY8aYznBO+jgSDtxedTMjIM4=
+github.com/Compogo/db-client v1.0.4-rc1 h1:Seg4gflPKnv9VIlkDnrcKSMLgrlZvPdNfwB0UuIIugs=
+github.com/Compogo/db-client v1.0.4-rc1/go.mod h1:XgU1Yr4i/1ehLcgpTs8BY8aYznBO+jgSDtxedTMjIM4=
 github.com/Compogo/db-migrator v1.0.1-rc1 h1:labthjpO8uzkJT6hfSnAbRa7LK8r6tidGW48D++vxVw=
 github.com/Compogo/db-migrator v1.0.1-rc1/go.mod h1:VKNcSJoABpybb7YDPEs4TkpsuWdQF6Oqyl1KYHiDTEo=
 github.com/Compogo/db-sql-generator v1.0.0-rc1 h1:eDMLqNhs9A4kEmsBNv8wBehi6NzgONflE4NaLqkguK8=
@@ -16,6 +18,8 @@ github.com/Compogo/types v1.0.0 h1:GdzqeGrV9CUuY7Mg6Z7Xpi4otlS3us2wPOX1kEhhATc=
 github.com/Compogo/types v1.0.0/go.mod h1:wESqB/vlZAKikW/ad9pc/eZ+CHMgPVeY0HXgOtD6x1g=
 github.com/Compogo/types v1.0.3 h1:v4DpmqVufGfHemv6wSzJcxs6lL+G4Y5Gnlr9oBngnTU=
 github.com/Compogo/types v1.0.3/go.mod h1:wESqB/vlZAKikW/ad9pc/eZ+CHMgPVeY0HXgOtD6x1g=
+github.com/Compogo/types v1.0.7 h1:EqlQX/nO4hQXLL0g3U+/5gY9H2Aw1yTAMJq4txdvB8w=
+github.com/Compogo/types v1.0.7/go.mod h1:wESqB/vlZAKikW/ad9pc/eZ+CHMgPVeY0HXgOtD6x1g=
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
