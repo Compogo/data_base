@@ -8,17 +8,17 @@ import (
 	"github.com/doug-martin/goqu/v9"
 )
 
-type BulkUpdater[T any] struct {
+type BulkUpdater struct {
 	tableName string
 	db        dbClient.Client
 	gen       *goqu.DialectWrapper
 }
 
-func NewBulkUpdater[T any](db dbClient.Client, gen *goqu.DialectWrapper, tableName string) *BulkUpdater[T] {
-	return &BulkUpdater[T]{tableName: tableName, db: db, gen: gen}
+func NewBulkUpdater(db dbClient.Client, gen *goqu.DialectWrapper, tableName string) *BulkUpdater {
+	return &BulkUpdater{tableName: tableName, db: db, gen: gen}
 }
 
-func (b *BulkUpdater[T]) BulkUpdate(ctx context.Context, pairs map[string]any, filters ...*repository.Filter) error {
+func (b *BulkUpdater) BulkUpdate(ctx context.Context, pairs map[string]any, filters ...*repository.Filter) error {
 	record := goqu.Record{}
 	for columnName, value := range pairs {
 		record[columnName] = value
