@@ -30,6 +30,10 @@ type BulkInserter[T any] struct {
 	gen           *goqu.DialectWrapper
 }
 
+func NewBulkInserter[T any](db dbClient.Client, gen *goqu.DialectWrapper, modelToRecord Mapper[T], tableName string) *BulkInserter[T] {
+	return &BulkInserter[T]{tableName: tableName, modelToRecord: modelToRecord, db: db, gen: gen}
+}
+
 func (b *BulkInserter[T]) BulkInsert(ctx context.Context, models ...*T) error {
 	rows := make([]any, len(models), 0)
 	for _, model := range models {
