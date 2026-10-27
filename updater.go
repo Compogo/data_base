@@ -71,6 +71,7 @@ func (u *Updater[T]) Update(ctx context.Context, model *T) (*T, error) {
 	query, args, err := u.gen.Update(u.tableName).
 		Set(u.mapper(model)).
 		Where(goqu.C(u.idColName).Eq(u.getIdentifier(model))).
+		Prepared(true).
 		ToSQL()
 
 	if err != nil {

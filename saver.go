@@ -65,7 +65,7 @@ func (s *Saver[T]) Save(ctx context.Context, model *T) (*T, error) {
 	if s.getIdentifier(model) == 0 {
 		queryBuilder = s.gen.Insert(s.tableName).Rows(record).Prepared(true)
 	} else {
-		queryBuilder = s.gen.Update(s.tableName).Set(record).Where(goqu.C(s.idColName).Eq(s.getIdentifier(model)))
+		queryBuilder = s.gen.Update(s.tableName).Set(record).Where(goqu.C(s.idColName).Eq(s.getIdentifier(model))).Prepared(true)
 	}
 
 	query, args, err := queryBuilder.ToSQL()
