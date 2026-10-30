@@ -119,6 +119,12 @@ func (s *Saver[T]) Save(ctx context.Context, model *T) (*T, error) {
 		return nil, err
 	}
 
+	if tx != nil {
+		if err := tx.Commit(); err != nil {
+			return nil, err
+		}
+	}
+
 	return model, nil
 }
 
